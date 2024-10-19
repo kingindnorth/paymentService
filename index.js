@@ -65,7 +65,7 @@
   
     // Start the server
     http.createServer(app).listen(serverPort, () => {
-      connect()
+      // connect()
       console.log(
         'Your server is listening on port %d (http://localhost:%d)',
         serverPort,
