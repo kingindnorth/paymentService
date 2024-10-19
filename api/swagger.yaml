@@ -1,0 +1,177 @@
+swagger: "2.0"
+info:
+  title: Payment MicroService API
+  description: API for managing payments including initiating, confirming, and checking payment status.
+  version: 1.0.0
+  contact:
+    email: prajjawal.tiwari.0311@gmail.com
+
+basePath: /payment
+
+paths:
+  /initiate-payment:
+    post:
+      summary: "Initiate a new payment"
+      operationId: "initiatePayment"
+      parameters:
+        - in: body
+          name: body
+          description: Payment initiation details
+          required: true
+          schema:
+            $ref: '#/definitions/InitiatePaymentRequest'
+      responses:
+        200:
+          description: Payment initiated successfully
+          schema:
+            $ref: '#/definitions/InitiatePaymentResponse'
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        500:
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
+  /confirm-payment:
+    post:
+      summary: "Confirm a payment"
+      operationId: "confirmPayment"
+      parameters:
+        - in: body
+          name: body
+          description: Payment confirmation details
+          required: true
+          schema:
+            $ref: '#/definitions/ConfirmPaymentRequest'
+      responses:
+        200:
+          description: Payment confirmed and order updated
+          schema:
+            $ref: '#/definitions/ConfirmPaymentResponse'
+        404:
+          description: Payment not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        500:
+          description: Failed to confirm payment or update order
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
+  /get-payment-status/{paymentId}:
+    get:
+      summary: "Get payment status by payment ID"
+      operationId: "getPaymentStatus"
+      parameters:
+        - name: paymentId
+          in: path
+          description: ID of the payment to fetch the status
+          required: true
+          type: string
+      responses:
+        200:
+          description: Payment status details
+          schema:
+            $ref: '#/definitions/PaymentStatusResponse'
+        404:
+          description: Payment not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        500:
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
+definitions:
+  InitiatePaymentRequest:
+    type: object
+    required:
+      - orderId
+      - customerId
+      - amount
+      - paymentMethod
+    properties:
+      orderId:
+        type: string
+      customerId:
+        type: string
+      amount:
+        type: number
+      paymentMethod:
+        type: string
+        enum: 
+          - PhonePe
+          - GooglePay
+          - Paytm
+
+  InitiatePaymentResponse:
+    type: object
+    properties:
+      message:
+        type: string
+        example: Payment initiated
+      paymentId:
+        type: string
+      upiId:
+        type: string
+      amount:
+        type: number
+
+  ConfirmPaymentRequest:
+    type: object
+    required:
+      - paymentId
+    properties:
+      paymentId:
+        type: string
+
+  ConfirmPaymentResponse:
+    type: object
+    properties:
+      message:
+        type: string
+        example: Payment confirmed and order updated
+      payment:
+        $ref: '#/definitions/Payment'
+
+  PaymentStatusResponse:
+    type: object
+    properties:
+      paymentId:
+        type: string
+      status:
+        type: string
+      amount:
+        type: number
+      paymentMethod:
+        type: string
+      upiId:
+        type: string
+
+  Payment:
+    type: object
+    properties:
+      orderId:
+        type: string
+      customerId:
+        type: string
+      amount:
+        type: number
+      paymentMethod:
+        type: string
+      upiId:
+        type: string
+      status:
+        type: string
+        enum: 
+          - Pending
+          - Success
+
+  ErrorModel:
+    type: object
+    properties:
+      code:
+        type: string
+      message:
+        type: string
